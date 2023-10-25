@@ -18,6 +18,16 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/",
   },
   {
+    label: "Create MultiSig",
+    href: "/contract",
+    icon: <BugAntIcon className="h-4 w-4" />,
+  },
+  {
+    label: "Assets & Owners",
+    href: "/assetsOwners",
+    icon: <BugAntIcon className="h-4 w-4" />,
+  },
+  {
     label: "Debug Contracts",
     href: "/debug",
     icon: <BugAntIcon className="h-4 w-4" />,
