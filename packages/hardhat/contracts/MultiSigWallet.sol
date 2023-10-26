@@ -141,7 +141,7 @@ contract MultiSigWallet {
         uint _txIndex
     ) public onlyOwner txExists(_txIndex) notExecuted(_txIndex) {
         Transaction storage transaction = transactions[_txIndex];
-
+        require(transaction.value <= address(this).balance, "not enough ETH in contract");
         require(
             transaction.numConfirmations >= numConfirmationsRequired,
             "cannot execute tx"
@@ -172,6 +172,10 @@ contract MultiSigWallet {
 
     function getOwners() public view returns (address[] memory) {
         return owners;
+    }
+
+    function getTransactions() public view returns (Transaction[] memory) {
+        return transactions;
     }
 
     function getTransactionCount() public view returns (uint) {

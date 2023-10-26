@@ -1,5 +1,4 @@
 import React from "react";
-import { fetchBalance } from "@wagmi/core";
 import type { NextPage } from "next";
 import { AddOwners } from "~~/components/multisigcontract/AddOwners";
 import { FundContract } from "~~/components/multisigcontract/FundContract";

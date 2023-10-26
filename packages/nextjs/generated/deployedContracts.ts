@@ -169,7 +169,7 @@ const contracts = {
           ],
         },
         MultiSigWallet: {
-          address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          address: "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
           abi: [
             {
               inputs: [
@@ -418,6 +418,46 @@ const contracts = {
                   internalType: "uint256",
                   name: "",
                   type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "getTransactions",
+              outputs: [
+                {
+                  components: [
+                    {
+                      internalType: "address",
+                      name: "to",
+                      type: "address",
+                    },
+                    {
+                      internalType: "uint256",
+                      name: "value",
+                      type: "uint256",
+                    },
+                    {
+                      internalType: "bytes",
+                      name: "data",
+                      type: "bytes",
+                    },
+                    {
+                      internalType: "bool",
+                      name: "executed",
+                      type: "bool",
+                    },
+                    {
+                      internalType: "uint256",
+                      name: "numConfirmations",
+                      type: "uint256",
+                    },
+                  ],
+                  internalType: "struct MultiSigWallet.Transaction[]",
+                  name: "",
+                  type: "tuple[]",
                 },
               ],
               stateMutability: "view",
