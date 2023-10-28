@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         MultiSigFactory: {
-          address: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+          address: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650",
           abi: [
             {
               anonymous: false,
@@ -13,14 +13,8 @@ const contracts = {
                 {
                   indexed: true,
                   internalType: "address",
-                  name: "owner",
+                  name: "creator",
                   type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "address[]",
-                  name: "owners",
-                  type: "address[]",
                 },
                 {
                   indexed: false,
@@ -28,62 +22,12 @@ const contracts = {
                   name: "signaturesRequired",
                   type: "uint256",
                 },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "chainId",
-                  type: "uint256",
-                },
               ],
               name: "NewMultiSigContract",
               type: "event",
             },
             {
-              anonymous: false,
               inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "owner",
-                  type: "address",
-                },
-              ],
-              name: "OwnerAdded",
-              type: "event",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "_owner",
-                  type: "address",
-                },
-              ],
-              name: "addOwner",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "chainId",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_chainId",
-                  type: "uint256",
-                },
                 {
                   internalType: "uint256",
                   name: "_signaturesRequired",
@@ -96,8 +40,14 @@ const contracts = {
               type: "function",
             },
             {
-              inputs: [],
-              name: "deployedContract",
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              name: "deployedContracts",
               outputs: [
                 {
                   internalType: "address",
@@ -110,7 +60,7 @@ const contracts = {
             },
             {
               inputs: [],
-              name: "getOwners",
+              name: "getDeployedContracts",
               outputs: [
                 {
                   internalType: "address[]",
@@ -124,12 +74,17 @@ const contracts = {
             {
               inputs: [
                 {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+                {
                   internalType: "uint256",
                   name: "",
                   type: "uint256",
                 },
               ],
-              name: "owners",
+              name: "multiSigContracts",
               outputs: [
                 {
                   internalType: "address",
@@ -141,16 +96,16 @@ const contracts = {
               type: "function",
             },
             {
-              inputs: [
+              inputs: [],
+              name: "newContract",
+              outputs: [
                 {
                   internalType: "address",
-                  name: "_owner",
+                  name: "",
                   type: "address",
                 },
               ],
-              name: "removeOwner",
-              outputs: [],
-              stateMutability: "nonpayable",
+              stateMutability: "view",
               type: "function",
             },
             {
