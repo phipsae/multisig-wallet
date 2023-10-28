@@ -2,7 +2,6 @@ import React from "react";
 import type { NextPage } from "next";
 import { ListTransactions } from "~~/components/multisigcontract/ListTransactions";
 import { SubmitTransaction } from "~~/components/multisigcontract/SubmitTransaction";
-import { Address, Balance, ContractInput } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo, useScaffoldContract } from "~~/hooks/scaffold-eth";
 
 const Transactions: NextPage = () => {
@@ -13,9 +12,13 @@ const Transactions: NextPage = () => {
 
   return (
     <>
-      <div>
-        <ListTransactions />
-        <SubmitTransaction />
+      <div className="container mx-auto flex flex-col mt-10">
+        <div className="flex justify-center mt-5">
+          <ListTransactions />
+        </div>
+        <div className="flex justify-center mt-5">
+          <SubmitTransaction />
+        </div>
       </div>
     </>
   );

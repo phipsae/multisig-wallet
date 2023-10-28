@@ -1,8 +1,13 @@
 import * as React from "react";
+import { EtherInput } from "../scaffold-eth";
+import { fetchBalance, getAccount } from "@wagmi/core";
 import { ethers } from "ethers";
 import { useDebounce } from "use-debounce";
 import { usePrepareSendTransaction, useSendTransaction, useWaitForTransaction } from "wagmi";
-import { useScaffoldContract, useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContract } from "~~/hooks/scaffold-eth";
+import { notification } from "~~/utils/scaffold-eth";
+
+export const NUMBER_REGEX = /^\.?\d+\.?\d*$/;
 
 export function FundContract() {
   const { data: multiSigWallet } = useScaffoldContract({
@@ -14,11 +19,31 @@ export function FundContract() {
   const [debouncedTo] = useDebounce(to, 500);
 
   const [amount, setAmount] = React.useState("");
-  const [debouncedAmount] = useDebounce(amount, 500);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const sender = await getAccount();
+    const balance = await fetchBalance({
+      address: String(sender.address),
+    });
+    if (amount == "") {
+      notification.error("Please insert the amount of ETH you want to spend");
+      return;
+    } else if (balance.formatted < amount) {
+      notification.error("Not enough ETH in wallet");
+      return;
+      // } else if (!NUMBER_REGEX.test(amount)) {
+      //   notification.error("Please insert the amount of ETH you want to spend");
+      //   return;
+    } else {
+      sendTransaction?.();
+    }
+  };
 
   const { config } = usePrepareSendTransaction({
     to: debouncedTo,
-    value: debouncedAmount ? ethers.parseEther(debouncedAmount) : undefined,
+    // value: isValidAmount ? ethers.parseEther(amount) : undefined,
+    value: NUMBER_REGEX.test(amount) ? ethers.parseEther(amount) : undefined,
   });
   const { data, sendTransaction } = useSendTransaction(config);
 
@@ -26,24 +51,43 @@ export function FundContract() {
     hash: data?.hash,
   });
 
+  const [transactionSubmitted, setTransactionSubmitted] = React.useState(false);
+  const [transactionSuccess, setTransactionSuccess] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isLoading && !transactionSubmitted) {
+      notification.info("Transaction submitted and now waiting for confirmation...", {
+        icon: "🕡",
+        duration: 13000,
+      });
+      setTransactionSubmitted(true);
+    }
+  }, [isLoading, transactionSubmitted]);
+
+  React.useEffect(() => {
+    if (isSuccess && !transactionSuccess) {
+      notification.success("Transaction successfully sent", {
+        icon: "🎉",
+      });
+      setTransactionSuccess(true);
+    }
+  }, [isSuccess, transactionSuccess]);
+
   return (
-    <form
-      onSubmit={e => {
-        e.preventDefault();
-        sendTransaction?.();
-      }}
-    >
-      <h2>Fund the contract with Ether</h2>
-      <input aria-label="Amount (ether)" onChange={e => setAmount(e.target.value)} placeholder="0.05" value={amount} />
-      <button disabled={isLoading || !sendTransaction || !to || !amount}>{isLoading ? "Sending..." : "Send"}</button>
-      {isSuccess && (
-        <div>
-          Successfully sent {amount} ether to {to}
-          <div>
-            <a href={`https://etherscan.io/tx/${data?.hash}`}>Etherscan</a>
-          </div>
+    <>
+      <div className="flex flex-col">
+        <div className="flex mb-4 justify-center items-center">
+          <h2>Fund the contract with Ether</h2>
         </div>
-      )}
-    </form>
+        <div className="flex mb-4 justify-center items-center">
+          <span className="w-1/2">
+            <EtherInput value={amount} onChange={amount => setAmount(amount)} name="eth" />
+          </span>
+          <button className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mx-2" onClick={handleSubmit}>
+            Send
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

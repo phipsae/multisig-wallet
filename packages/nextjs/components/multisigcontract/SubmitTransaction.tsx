@@ -1,15 +1,11 @@
 import * as React from "react";
+import { AddressInput, EtherInput } from "../scaffold-eth";
 import { ethers } from "ethers";
 import { useDebounce } from "use-debounce";
 import { useContractWrite } from "wagmi";
-import {
-  useAnimationConfig,
-  useScaffoldContract,
-  useScaffoldContractRead,
-  useScaffoldContractWrite,
-  useScaffoldEventHistory,
-  useScaffoldEventSubscriber,
-} from "~~/hooks/scaffold-eth";
+import { useScaffoldContract, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+
+export const NUMBER_REGEX = /^\.?\d+\.?\d*$/;
 
 export function SubmitTransaction() {
   const [to, setTo] = React.useState("");
@@ -22,38 +18,39 @@ export function SubmitTransaction() {
     contractName: "MultiSigWallet",
   });
 
-  // WAGMI: contract write
   const {
-    data,
+    writeAsync: submitTransaction,
     isLoading,
-    isSuccess,
-    write: submitTransaction,
-  } = useContractWrite({
-    address: multiSigWallet?.address,
-    abi: multiSigWallet?.abi,
+    isMining,
+  } = useScaffoldContractWrite({
+    contractName: "MultiSigWallet",
     functionName: "submitTransaction",
+    args: [to, NUMBER_REGEX.test(amount) ? ethers.parseEther(amount) : undefined, "0x0"],
+    blockConfirmations: 1,
+    onBlockConfirmation: txnReceipt => {
+      console.log("Transaction blockHash", txnReceipt.blockHash);
+    },
   });
 
   return (
-    <form
-      onSubmit={e => {
-        e.preventDefault();
-        submitTransaction({
-          args: [debouncedTo, ethers.parseEther(debouncedAmount), "0x"],
-        });
-      }}
-    >
-      <input aria-label="Recipient" onChange={e => setTo(e.target.value)} placeholder="0xA0Cf…251e" value={to} />
-      <input aria-label="Amount (ether)" onChange={e => setAmount(e.target.value)} placeholder="0.05" value={amount} />
-      <button disabled={isLoading || !submitTransaction || !to || !amount}>{isLoading ? "Sending..." : "Send"}</button>
-      {isSuccess && (
-        <div>
-          Successfully sent {amount} ether to {to}
-          <div>
-            <a href={`https://etherscan.io/tx/${data?.hash}`}>Etherscan</a>
-          </div>
+    <>
+      <div className="flex flex-col">
+        <div className="text-center mb-4">
+          <span className="block text-2xl font-bold">Create Transaction</span>
         </div>
-      )}
-    </form>
+
+        <div className="flex flex-col gap-4 mb-4 justify-center items-center">
+          <span className="w-7/8">
+            <AddressInput value={to ?? ""} onChange={to => setTo(to)} placeholder="Address Receiver" />
+          </span>
+          <span className="w-5/6">
+            <EtherInput value={amount} onChange={amount => setAmount(amount)} placeholder="Amount" />
+          </span>
+          <button className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto" onClick={() => submitTransaction()}>
+            Create
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

@@ -1,38 +1,18 @@
 import * as React from "react";
 import { ethers } from "ethers";
-import { useDebounce } from "use-debounce";
 import { useContractRead, useContractWrite } from "wagmi";
-import { Address, Balance } from "~~/components/scaffold-eth";
-import {
-  useAnimationConfig,
-  useScaffoldContract,
-  useScaffoldContractRead,
-  useScaffoldContractWrite,
-  useScaffoldEventHistory,
-  useScaffoldEventSubscriber,
-} from "~~/hooks/scaffold-eth";
+import { CheckIcon, PaperAirplaneIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Address } from "~~/components/scaffold-eth";
+import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 
 export function ListTransactions() {
-  const [txId, setTxId] = React.useState(0);
-
   const { data: multiSigWalletInfo } = useDeployedContractInfo("MultiSigWallet");
-
-  const { data: transactionCount } = useScaffoldContractRead({
-    contractName: "MultiSigWallet",
-    functionName: "getTransactionCount",
-  });
 
   const { data: confirmationsRequired } = useScaffoldContractRead({
     contractName: "MultiSigWallet",
     functionName: "numConfirmationsRequired",
   });
-
-  //   const { data: getTransaction } = useScaffoldContractRead({
-  //     contractName: "MultiSigWallet",
-  //     functionName: "getTransaction",
-  //     args: [BigInt(txId)],
-  //   });
 
   const { data: getTransactions } = useScaffoldContractRead({
     contractName: "MultiSigWallet",
@@ -43,7 +23,7 @@ export function ListTransactions() {
   const {
     data,
     isLoading,
-    isSuccess,
+    isSuccess: isConfirmed,
     write: confirmTransaction,
   } = useContractWrite({
     address: multiSigWalletInfo?.address,
@@ -73,12 +53,36 @@ export function ListTransactions() {
     functionName: "executeTransaction",
   });
 
+  const {
+    data: deleteData,
+    isLoading: deleteLoading,
+    isSuccess: deleteSuccess,
+    write: deleteTransaction,
+  } = useContractWrite({
+    address: multiSigWalletInfo?.address,
+    abi: multiSigWalletInfo?.abi,
+    functionName: "deleteTransaction",
+  });
+
+  const nonExecutedTransactions = () => {
+    let counter = 0;
+    getTransactions?.map(tx => {
+      if (tx.executed == false) {
+        counter += 1;
+      }
+    });
+    if (counter == 0) {
+      return false;
+    }
+    return true;
+  };
+
   return (
     <>
       <div className="mt-8">
         <div className="text-center mb-4">
           <span className="block text-2xl font-bold">
-            Transaction List - required Signatures: {Number(confirmationsRequired)}
+            Transaction List - required Confirmations: {Number(confirmationsRequired)}
           </span>
         </div>
         <div className="overflow-x-auto shadow-lg">
@@ -91,62 +95,78 @@ export function ListTransactions() {
                 <th className="bg-primary">Give Confirmation</th>
                 <th className="bg-primary">Revoke Confirmation</th>
                 <th className="bg-primary">Execute Transaction</th>
+                <th className="bg-primary">Delete Transaction</th>
               </tr>
             </thead>
             <tbody>
-              {!getTransactions || getTransactions.length === 0 ? (
+              {!getTransactions || getTransactions.length === 0 || !nonExecutedTransactions() ? (
                 <tr>
                   <td colSpan={6} className="text-center">
-                    No owners added yet
+                    No open transactions yet
                   </td>
                 </tr>
               ) : (
                 getTransactions?.map((tx, index) => {
-                  return (
-                    <tr key={index}>
-                      <td className="text-center">
-                        <Address address={tx.to} />
-                      </td>
-                      <td className="text-center">{Number(tx.value)}</td>
-                      <td className="text-center">{Number(tx.numConfirmations)}</td>
-                      <td className="text-center">
-                        <button
-                          disabled={!confirmTransaction}
-                          onClick={() =>
-                            confirmTransaction({
-                              args: [BigInt(index)],
-                            })
-                          }
-                        >
-                          Give Confirmation
-                        </button>
-                      </td>
-                      <td className="text-center">
-                        <button
-                          disabled={!revokeConfirmation}
-                          onClick={() =>
-                            revokeConfirmation({
-                              args: [BigInt(index)],
-                            })
-                          }
-                        >
-                          Revoke Confirmation
-                        </button>
-                      </td>
-                      <td className="text-center">
-                        <button
-                          disabled={!executeTransaction}
-                          onClick={() =>
-                            executeTransaction({
-                              args: [BigInt(index)],
-                            })
-                          }
-                        >
-                          Execute Transaction
-                        </button>
-                      </td>
-                    </tr>
-                  );
+                  if (tx.executed == false) {
+                    return (
+                      <tr key={index}>
+                        <td className="text-center">
+                          <Address address={tx.to} />
+                        </td>
+                        <td className="text-center">{ethers.formatEther(tx.value)}</td>
+                        <td className="text-center">{Number(tx.numConfirmations)}</td>
+                        <td className="text-center">
+                          <button
+                            disabled={!confirmTransaction}
+                            onClick={() =>
+                              confirmTransaction({
+                                args: [BigInt(index)],
+                              })
+                            }
+                          >
+                            <CheckIcon className="h-4 w-4" />
+                          </button>
+                        </td>
+                        <td className="text-center">
+                          <button
+                            disabled={!revokeConfirmation}
+                            onClick={() =>
+                              revokeConfirmation({
+                                args: [BigInt(index)],
+                              })
+                            }
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                        </td>
+                        <td className="text-center">
+                          <button
+                            hidden={tx.numConfirmations < Number(confirmationsRequired)}
+                            disabled={!executeTransaction}
+                            onClick={() =>
+                              executeTransaction({
+                                args: [BigInt(index)],
+                              })
+                            }
+                          >
+                            <PaperAirplaneIcon className="h-4 w-4" />
+                          </button>
+                        </td>
+                        <td className="text-center">
+                          <button
+                            disabled={!deleteTransaction}
+                            onClick={() =>
+                              deleteTransaction({
+                                args: [BigInt(index)],
+                              })
+                            }
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  }
                 })
               )}
             </tbody>

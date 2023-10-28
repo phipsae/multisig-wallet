@@ -170,6 +170,17 @@ contract MultiSigWallet {
         emit RevokeConfirmation(msg.sender, _txIndex);
     }
 
+    function deleteTransaction(uint _txIndex) public {
+        Transaction storage transaction = transactions[_txIndex];
+        require(transaction.executed == false, "Transaction has already been executed");
+        require(_txIndex < transactions.length, "index out of bound");
+        for (uint i = _txIndex; i < transactions.length - 1; i++) {
+            transactions[i] = transactions[i + 1];
+        }
+        transactions.pop();
+
+    }
+
     function getOwners() public view returns (address[] memory) {
         return owners;
     }
