@@ -8,22 +8,26 @@ contract MultiSigFactory {
 
     event NewMultiSigContract(address indexed creator, uint256 signaturesRequired );
 
-    // address public deployedContract;
-    address[] public deployedContracts;
+    MultiSigContract[] public multiSigContracts;
     address public newContract;
-    uint256 public signaturesRequired;
-    mapping(address => address[]) public multiSigContracts;
 
-    function getDeployedContracts() public view returns (address[] memory) {
-        return deployedContracts;
+    struct MultiSigContract {
+        address owner;
+        address contractAddress;
+        uint requiredConfirmations;
+        bool shown;
     }
 
-    function createContract(uint _signaturesRequired) public {
-        require(_signaturesRequired > 0, "signatures must be greater than 0");
-        newContract = address(new MultiSigWallet(msg.sender, _signaturesRequired));
-        deployedContracts.push(newContract);
-        multiSigContracts[msg.sender].push(newContract);
-        emit NewMultiSigContract(msg.sender, _signaturesRequired);   
+    function getMultiSigContracts() public view returns (MultiSigContract[] memory) {
+        return multiSigContracts;
+    }
+
+    function createContract(uint _requiredConfirmations) public {
+        require(_requiredConfirmations > 0, "signatures must be greater than 0");
+        newContract = address(new MultiSigWallet(msg.sender, _requiredConfirmations));
+        multiSigContracts.push(MultiSigContract({owner: msg.sender, contractAddress: newContract, requiredConfirmations: _requiredConfirmations, shown: true}));
+    
+        emit NewMultiSigContract(msg.sender, _requiredConfirmations);   
     }
 }
 

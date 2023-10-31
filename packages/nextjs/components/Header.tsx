@@ -19,7 +19,7 @@ export const menuLinks: HeaderMenuLink[] = [
   },
   {
     label: "Create MultiSig",
-    href: "/contract",
+    href: "/createContract",
     icon: <DocumentPlusIcon className="h-4 w-4" />,
   },
   {

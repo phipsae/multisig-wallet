@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         MultiSigFactory: {
-          address: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650",
+          address: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
           abi: [
             {
               anonymous: false,
@@ -30,7 +30,7 @@ const contracts = {
               inputs: [
                 {
                   internalType: "uint256",
-                  name: "_signaturesRequired",
+                  name: "_requiredConfirmations",
                   type: "uint256",
                 },
               ],
@@ -40,32 +40,35 @@ const contracts = {
               type: "function",
             },
             {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              name: "deployedContracts",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
               inputs: [],
-              name: "getDeployedContracts",
+              name: "getMultiSigContracts",
               outputs: [
                 {
-                  internalType: "address[]",
+                  components: [
+                    {
+                      internalType: "address",
+                      name: "owner",
+                      type: "address",
+                    },
+                    {
+                      internalType: "address",
+                      name: "contractAddress",
+                      type: "address",
+                    },
+                    {
+                      internalType: "uint256",
+                      name: "requiredConfirmations",
+                      type: "uint256",
+                    },
+                    {
+                      internalType: "bool",
+                      name: "shown",
+                      type: "bool",
+                    },
+                  ],
+                  internalType: "struct MultiSigFactory.MultiSigContract[]",
                   name: "",
-                  type: "address[]",
+                  type: "tuple[]",
                 },
               ],
               stateMutability: "view",
@@ -73,11 +76,6 @@ const contracts = {
             },
             {
               inputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
                 {
                   internalType: "uint256",
                   name: "",
@@ -88,8 +86,23 @@ const contracts = {
               outputs: [
                 {
                   internalType: "address",
-                  name: "",
+                  name: "owner",
                   type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "contractAddress",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "requiredConfirmations",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "shown",
+                  type: "bool",
                 },
               ],
               stateMutability: "view",
@@ -108,23 +121,10 @@ const contracts = {
               stateMutability: "view",
               type: "function",
             },
-            {
-              inputs: [],
-              name: "signaturesRequired",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
           ],
         },
         MultiSigWallet: {
-          address: "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
+          address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
           abi: [
             {
               inputs: [
