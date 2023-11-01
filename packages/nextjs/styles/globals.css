@@ -11,6 +11,10 @@ body {
   min-height: 100vh;
 }
 
+.bg-blue-100 {
+  background-color: #b3d9ff !important;
+}
+
 h1,
 h2,
 h3,

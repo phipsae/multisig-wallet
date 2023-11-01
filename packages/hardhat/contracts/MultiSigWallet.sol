@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
+import './IMultiSigFactory.sol';
 import "hardhat/console.sol";
+
 
 contract MultiSigWallet {
     event Deposit(address indexed sender, uint amount, uint balance);
@@ -20,6 +22,7 @@ contract MultiSigWallet {
     address public creator;
     mapping(address => bool) public isOwner;
     uint public numConfirmationsRequired;
+    address public factoryAddress;
 
     struct Transaction {
         address to;
@@ -59,7 +62,7 @@ contract MultiSigWallet {
         _;
     }
 
-    constructor(address _creator, uint _numConfirmationsRequired) {
+    constructor(address _creator, uint _numConfirmationsRequired, address _factoryAddress) {
         require(
             _numConfirmationsRequired > 0,
             "invalid number of required confirmations"
@@ -68,6 +71,7 @@ contract MultiSigWallet {
         isOwner[_creator] = true;
         owners.push(_creator);
         creator = _creator;
+        factoryAddress = _factoryAddress;
 
         numConfirmationsRequired = _numConfirmationsRequired;
     }
@@ -80,6 +84,13 @@ contract MultiSigWallet {
         }
         owners.push(_owner);
         isOwner[_owner] = true;
+
+        // console.log("huhu", owners);
+        console.log("Address: ", address(this));
+        console.log("FactoryAddress: ", factoryAddress);
+        
+        
+        IMultiSigFactory(factoryAddress).updateSigners(address(this), owners);
         // emit OwnerAdded(_owner);
     }
 
@@ -89,6 +100,7 @@ contract MultiSigWallet {
             owners[i] = owners[i + 1];
         }
         owners.pop();
+        
     }
 
     function removeOwner(address _owner) public onlyCreator {

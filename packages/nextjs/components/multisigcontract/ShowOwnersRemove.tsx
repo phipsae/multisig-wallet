@@ -1,56 +1,81 @@
 import { useEffect, useState } from "react";
-import { useContractWrite } from "wagmi";
+import { useContractRead, useContractWrite } from "wagmi";
 import { CheckIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { PopUp } from "~~/components/multisigcontract/PopUp";
 import { Address } from "~~/components/scaffold-eth";
-import { useScaffoldContract, useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 
-export const ShowOwnersRemove = () => {
+export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
   const [removeOwner, setRemoveOwner] = useState("");
-
-  useEffect(() => {
-    console.log("RemoveOwner from Effect: ", removeOwner);
-  }, [removeOwner]);
-
-  const { data: owners } = useScaffoldContractRead({
-    contractName: "MultiSigWallet",
-    functionName: "getOwners",
-  });
-
-  const { data: creator } = useScaffoldContractRead({
-    contractName: "MultiSigWallet",
-    functionName: "creator",
-  });
-
-  const { data: confirmationsRequired } = useScaffoldContractRead({
-    contractName: "MultiSigWallet",
-    functionName: "numConfirmationsRequired",
-  });
 
   const { data: multiSigWallet } = useScaffoldContract({
     contractName: "MultiSigWallet",
   });
 
-  // WAGMI: contract write
-  // const { data, isLoading, isSuccess, write } = useContractWrite({
-  //   address: multiSigWallet?.address,
-  //   abi: multiSigWallet?.abi,
-  //   functionName: "removeOwner",
+  useEffect(() => {
+    console.log("RemoveOwner from Effect: ", removeOwner);
+  }, [removeOwner]);
+
+  const {
+    data: owners,
+    isError: ownersError,
+    isLoading: ownersLoading,
+  } = useContractRead({
+    address: multiSigWalletAddress.multiSigWalletAddress,
+    abi: multiSigWallet?.abi,
+    functionName: "getOwners",
+  });
+
+  // const { data: owners } = useScaffoldContractRead({
+  //   contractName: "MultiSigWallet",
+  //   functionName: "getOwners",
+  // });
+
+  const { data: creator } = useContractRead({
+    address: multiSigWalletAddress.multiSigWalletAddress,
+    abi: multiSigWallet?.abi,
+    functionName: "creator",
+  });
+
+  // const { data: creator } = useScaffoldContractRead({
+  //   contractName: "MultiSigWallet",
+  //   functionName: "creator",
+  // });
+
+  const { data: confirmationsRequired } = useContractRead({
+    address: multiSigWalletAddress.multiSigWalletAddress,
+    abi: multiSigWallet?.abi,
+    functionName: "numConfirmationsRequired",
+  });
+
+  // const { data: confirmationsRequired } = useScaffoldContractRead({
+  //   contractName: "MultiSigWallet",
+  //   functionName: "numConfirmationsRequired",
   // });
 
   const {
-    writeAsync: removeOwners,
-    isLoading: rO,
-    isMining: rOM,
-  } = useScaffoldContractWrite({
-    contractName: "MultiSigWallet",
-    functionName: "removeOwner",
-    args: [removeOwner],
-    blockConfirmations: 1,
-    onBlockConfirmation: txnReceipt => {
-      console.log("Transaction blockHash", txnReceipt.blockHash);
-    },
+    // data,
+    // isLoading,
+    // isSuccess,
+    write: removeOwners,
+  } = useContractWrite({
+    address: multiSigWalletAddress.multiSigWalletAddress,
+    abi: multiSigWallet?.abi,
+    functionName: "addOwner",
   });
+
+  // const {
+  //   writeAsync: removeOwners,
+  //   isLoading: rO,
+  //   isMining: rOM,
+  // } = useScaffoldContractWrite({
+  //   contractName: "MultiSigWallet",
+  //   functionName: "removeOwner",
+  //   args: [removeOwner],
+  //   blockConfirmations: 1,
+  //   onBlockConfirmation: txnReceipt => {
+  //     console.log("Transaction blockHash", txnReceipt.blockHash);
+  //   },
+  // });
 
   return (
     <>
@@ -109,7 +134,7 @@ export const ShowOwnersRemove = () => {
                             hidden={removeOwner != owner || creator == owner}
                             disabled={!removeOwners}
                             onClick={() => {
-                              removeOwner != "" && removeOwners();
+                              removeOwner != "" && removeOwners({ args: [removeOwner] });
                               // write({
                               //   args: [owner],
                               // });

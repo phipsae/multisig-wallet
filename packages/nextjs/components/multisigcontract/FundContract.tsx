@@ -4,18 +4,12 @@ import { fetchBalance, getAccount } from "@wagmi/core";
 import { ethers } from "ethers";
 import { useDebounce } from "use-debounce";
 import { usePrepareSendTransaction, useSendTransaction, useWaitForTransaction } from "wagmi";
-import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
 export const NUMBER_REGEX = /^\.?\d+\.?\d*$/;
 
-export function FundContract() {
-  const { data: multiSigWallet } = useScaffoldContract({
-    contractName: "MultiSigWallet",
-  });
-
-  const to = multiSigWallet?.address;
-  // const [to, setTo] = React.useState("");
+export function FundContract(multiSigWalletAddress: any) {
+  const to = multiSigWalletAddress.multiSigWalletAddress;
   const [debouncedTo] = useDebounce(to, 500);
 
   const [amount, setAmount] = React.useState("");

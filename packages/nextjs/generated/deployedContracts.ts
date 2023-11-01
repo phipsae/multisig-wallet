@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         MultiSigFactory: {
-          address: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+          address: "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
           abi: [
             {
               anonymous: false,
@@ -65,6 +65,11 @@ const contracts = {
                       name: "shown",
                       type: "bool",
                     },
+                    {
+                      internalType: "address[]",
+                      name: "signers",
+                      type: "address[]",
+                    },
                   ],
                   internalType: "struct MultiSigFactory.MultiSigContract[]",
                   name: "",
@@ -121,10 +126,28 @@ const contracts = {
               stateMutability: "view",
               type: "function",
             },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_contractAddress",
+                  type: "address",
+                },
+                {
+                  internalType: "address[]",
+                  name: "_newSigners",
+                  type: "address[]",
+                },
+              ],
+              name: "updateSigners",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
           ],
         },
         MultiSigWallet: {
-          address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+          address: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
           abi: [
             {
               inputs: [
@@ -137,6 +160,11 @@ const contracts = {
                   internalType: "uint256",
                   name: "_numConfirmationsRequired",
                   type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "_factoryAddress",
+                  type: "address",
                 },
               ],
               stateMutability: "nonpayable",
@@ -324,6 +352,19 @@ const contracts = {
               name: "executeTransaction",
               outputs: [],
               stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "factoryAddress",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
               type: "function",
             },
             {

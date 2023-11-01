@@ -8,7 +8,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
   await deploy("MultiSigWallet", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    args: ["0xdA499DBA956F590f658D52ED4d1020f33469BbD0", 2],
+    args: ["0xdA499DBA956F590f658D52ED4d1020f33469BbD0", 2, "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9"],
     log: true,
   });
 

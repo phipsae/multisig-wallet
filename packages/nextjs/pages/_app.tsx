@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { AppProps } from "next/app";
+import { SharedStateProvider } from "../sharedStateContext";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 import NextNProgress from "nextjs-progressbar";
@@ -22,6 +23,9 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const { isDarkMode } = useDarkMode();
 
+  // from me
+  const [multiSigWallet, setMultiSigWallet] = useState<string>("HUHU!!!!");
+
   useEffect(() => {
     if (price > 0) {
       setNativeCurrencyPrice(price);
@@ -43,7 +47,9 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="relative flex flex-col flex-1">
-            <Component {...pageProps} />
+            <SharedStateProvider>
+              <Component {...pageProps} />
+            </SharedStateProvider>
           </main>
           <Footer />
         </div>

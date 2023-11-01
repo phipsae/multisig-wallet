@@ -1,30 +1,31 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { AddressInput } from "../scaffold-eth";
-import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
-import { notification } from "~~/utils/scaffold-eth";
+import { useContractWrite } from "wagmi";
+import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 
-export const AddOwners = () => {
+export const AddOwners = (multiSigWalletAddress: any) => {
   const [newAddress, setNewAddress] = useState<string>("");
 
-  const {
-    writeAsync: addOwner,
-    isLoading,
-    isMining,
-  } = useScaffoldContractWrite({
+  const { data: multiSigWallet } = useScaffoldContract({
     contractName: "MultiSigWallet",
+  });
+
+  const {
+    data,
+    isLoading,
+    isSuccess,
+    write: addOwner,
+  } = useContractWrite({
+    address: multiSigWalletAddress.multiSigWalletAddress,
+    abi: multiSigWallet?.abi,
     functionName: "addOwner",
-    args: [newAddress],
-    blockConfirmations: 1,
-    onBlockConfirmation: txnReceipt => {
-      console.log("Transaction blockHash", txnReceipt.blockHash);
-    },
   });
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // Do something with the input value, e.g., submit it to an API
-    addOwner();
+    addOwner({ args: [newAddress] });
     console.log("Input value submitted:", newAddress);
   };
 
