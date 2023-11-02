@@ -12,17 +12,17 @@ const CreateContract: NextPage = () => {
   const { myAddress, setMyAddress } = useSharedState();
   // const { multiSigWalletAddress, setMultiSigWalletAddress } = useSharedState();
 
-  // useEffect(() => {
-  //   if (walletConnected) {
-  //     setMyAddress(getAccount().address?.toString() || "");
-  //     console.log("from UseEffect, ", myAddress);
-  //     if (myAddress != "") {
-  //       setWalletConnected(true);
-  //     }
-  //   } else {
-  //     setMyAddress("");
-  //   }
-  // }, [myAddress]);
+  useEffect(() => {
+    if (walletConnected) {
+      setMyAddress(getAccount().address?.toString() || "");
+      console.log("from UseEffect, ", myAddress);
+      if (myAddress != "") {
+        setWalletConnected(true);
+      }
+    } else {
+      setMyAddress("");
+    }
+  }, [myAddress]);
 
   return (
     <>
@@ -49,8 +49,8 @@ const CreateContract: NextPage = () => {
             </div>
           </div>
         )}
+        {walletConnected && <AccountConnectButton walletConnect={false} address={""} />}
       </div>
-      {walletConnected && <AccountConnectButton walletConnect={false} address={""} />}
     </>
   );
 };

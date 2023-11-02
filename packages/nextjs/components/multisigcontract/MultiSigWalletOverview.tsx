@@ -1,15 +1,6 @@
-import React from "react";
 import { Address, Balance } from "~~/components/scaffold-eth";
 
-// import { useDeployedContractInfo, useScaffoldContract } from "~~/hooks/scaffold-eth";
-
 export const MultiSigWalletOverview = (multiSigWalletAddress: any) => {
-  // const { data: multiSigWallet } = useScaffoldContract({
-  //   contractName: "MultiSigWallet",
-  //   address: "0xdA499DBA956F590f658D52ED4d1020f33469BbD0",
-  // });
-  // const { data: MultiSigWalletInfo } = useDeployedContractInfo("MultiSigWallet");
-
   return (
     <>
       <div>

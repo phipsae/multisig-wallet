@@ -7,30 +7,41 @@ import { useScaffoldContract, useScaffoldContractWrite } from "~~/hooks/scaffold
 
 export const NUMBER_REGEX = /^\.?\d+\.?\d*$/;
 
-export function SubmitTransaction() {
+export const SubmitTransaction = (multiSigWalletAddress: any) => {
   const [to, setTo] = React.useState("");
   const [debouncedTo] = useDebounce(to, 500);
 
   const [amount, setAmount] = React.useState("");
-  const [debouncedAmount] = useDebounce(amount, 500);
+  // const [debouncedAmount] = useDebounce(amount, 500);
 
   const { data: multiSigWallet } = useScaffoldContract({
     contractName: "MultiSigWallet",
   });
 
   const {
-    writeAsync: submitTransaction,
+    data,
     isLoading,
-    isMining,
-  } = useScaffoldContractWrite({
-    contractName: "MultiSigWallet",
+    isSuccess,
+    write: submitTransaction,
+  } = useContractWrite({
+    address: multiSigWalletAddress.multiSigWalletAddress,
+    abi: multiSigWallet?.abi,
     functionName: "submitTransaction",
-    args: [to, NUMBER_REGEX.test(amount) ? ethers.parseEther(amount) : undefined, "0x0"],
-    blockConfirmations: 1,
-    onBlockConfirmation: txnReceipt => {
-      console.log("Transaction blockHash", txnReceipt.blockHash);
-    },
   });
+
+  // const {
+  //   writeAsync: submitTransaction,
+  //   isLoading,
+  //   isMining,
+  // } = useScaffoldContractWrite({
+  //   contractName: "MultiSigWallet",
+  //   functionName: "submitTransaction",
+  //   args: [to, NUMBER_REGEX.test(amount) ? ethers.parseEther(amount) : undefined, "0x0"],
+  //   blockConfirmations: 1,
+  //   onBlockConfirmation: txnReceipt => {
+  //     console.log("Transaction blockHash", txnReceipt.blockHash);
+  //   },
+  // });
 
   return (
     <>
@@ -46,11 +57,18 @@ export function SubmitTransaction() {
           <span className="w-5/6">
             <EtherInput value={amount} onChange={amount => setAmount(amount)} placeholder="Amount" />
           </span>
-          <button className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto" onClick={() => submitTransaction()}>
+          <button
+            className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto"
+            onClick={() => {
+              submitTransaction({
+                args: [to, ethers.parseEther(amount), "0x0"],
+              });
+            }}
+          >
             Create
           </button>
         </div>
       </div>
     </>
   );
-}
+};

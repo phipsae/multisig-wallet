@@ -1,32 +1,33 @@
-import * as React from "react";
+import { useEffect } from "react";
 import { ethers } from "ethers";
 import { useContractRead, useContractWrite } from "wagmi";
 import { CheckIcon, PaperAirplaneIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
-import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
+import { notification } from "~~/utils/scaffold-eth";
 
-export function ListTransactions() {
+export const ListTransactions = (multiSigWalletAddress: any) => {
   const { data: multiSigWalletInfo } = useDeployedContractInfo("MultiSigWallet");
 
-  const { data: confirmationsRequired } = useScaffoldContractRead({
-    contractName: "MultiSigWallet",
+  const { data: confirmationsRequired } = useContractRead({
+    address: multiSigWalletAddress.multiSigWalletAddress,
+    abi: multiSigWalletInfo?.abi,
     functionName: "numConfirmationsRequired",
   });
 
-  const { data: getTransactions } = useScaffoldContractRead({
-    contractName: "MultiSigWallet",
+  const { data: getTransactions, refetch: refetchGetTransactions } = useContractRead({
+    address: multiSigWalletAddress.multiSigWalletAddress,
+    abi: multiSigWalletInfo?.abi,
     functionName: "getTransactions",
   });
 
-  // WAGMI: contract write
   const {
     data,
     isLoading,
     isSuccess: isConfirmed,
     write: confirmTransaction,
   } = useContractWrite({
-    address: multiSigWalletInfo?.address,
+    address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWalletInfo?.abi,
     functionName: "confirmTransaction",
   });
@@ -37,7 +38,7 @@ export function ListTransactions() {
     isSuccess: isSuccessRevoke,
     write: revokeConfirmation,
   } = useContractWrite({
-    address: multiSigWalletInfo?.address,
+    address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWalletInfo?.abi,
     functionName: "revokeConfirmation",
   });
@@ -48,7 +49,7 @@ export function ListTransactions() {
     isSuccess: isSuccessExecute,
     write: executeTransaction,
   } = useContractWrite({
-    address: multiSigWalletInfo?.address,
+    address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWalletInfo?.abi,
     functionName: "executeTransaction",
   });
@@ -59,7 +60,7 @@ export function ListTransactions() {
     isSuccess: deleteSuccess,
     write: deleteTransaction,
   } = useContractWrite({
-    address: multiSigWalletInfo?.address,
+    address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWalletInfo?.abi,
     functionName: "deleteTransaction",
   });
@@ -76,6 +77,33 @@ export function ListTransactions() {
     }
     return true;
   };
+
+  useEffect(() => {
+    if (isConfirmed || isSuccessRevoke || isSuccessExecute || deleteSuccess) {
+      // Perform any necessary actions on success
+      console.log("Transaction successful!");
+      // For example, you might want to refetch data or redirect to another page
+      // ... (your code for handling success)
+      notification.success("Transaction successfully sent", {
+        icon: "🎉",
+      });
+      refetchGetTransactions();
+    }
+    if (isLoading || isLoadingRevoke || isLoadingExecute || deleteLoading) {
+      // Show the spinner when loading
+      console.log("isLoading");
+    }
+  }, [
+    isConfirmed,
+    isSuccessRevoke,
+    isSuccessExecute,
+    deleteSuccess,
+    isLoading,
+    isLoadingRevoke,
+    isLoadingExecute,
+    deleteLoading,
+    refetchGetTransactions,
+  ]);
 
   return (
     <>
@@ -126,6 +154,7 @@ export function ListTransactions() {
                           >
                             <CheckIcon className="h-4 w-4" />
                           </button>
+                          {isConfirmed}
                         </td>
                         <td className="text-center">
                           <button
@@ -175,4 +204,4 @@ export function ListTransactions() {
       </div>
     </>
   );
-}
+};

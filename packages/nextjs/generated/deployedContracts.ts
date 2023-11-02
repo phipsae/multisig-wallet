@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         MultiSigFactory: {
-          address: "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
+          address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
           abi: [
             {
               anonymous: false,
@@ -134,6 +134,24 @@ const contracts = {
                   type: "address",
                 },
                 {
+                  internalType: "address",
+                  name: "_signerToRemove",
+                  type: "address",
+                },
+              ],
+              name: "removeSigners",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "_contractAddress",
+                  type: "address",
+                },
+                {
                   internalType: "address[]",
                   name: "_newSigners",
                   type: "address[]",
@@ -147,7 +165,7 @@ const contracts = {
           ],
         },
         MultiSigWallet: {
-          address: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+          address: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
           abi: [
             {
               inputs: [

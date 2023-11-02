@@ -113,6 +113,7 @@ contract MultiSigWallet {
             }
         }
         isOwner[_owner] = false;
+         IMultiSigFactory(factoryAddress).removeSigners(address(this), _owner);
     }
 
     receive() external payable {

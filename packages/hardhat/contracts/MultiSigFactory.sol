@@ -48,6 +48,31 @@ contract MultiSigFactory is IMultiSigFactory {
         }
     }
 
+    function removeSigners(address _contractAddress, address _signerToRemove) public {
+    console.log("Removing signer from MultiSigFactory");
+        for (uint i = 0; i < multiSigContracts.length; i++) {
+            if (multiSigContracts[i].contractAddress == _contractAddress) {
+                address[] storage existingSigners = multiSigContracts[i].signers;
+
+                for (uint j = 0; j < existingSigners.length; j++) {
+                    if (existingSigners[j] == _signerToRemove) {
+                        // Remove signer from array
+                        removeSignerAtIndex(existingSigners, j);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    function removeSignerAtIndex(address[] storage _signers, uint _index) internal {
+        require(_index < _signers.length, "index out of bound");
+        for (uint i = _index; i < _signers.length - 1; i++) {
+            _signers[i] = _signers[i + 1];
+        }
+        _signers.pop();
+    }
+
     function createContract(uint _requiredConfirmations) public {
         require(_requiredConfirmations > 0, "signatures must be greater than 0");
         newContract = address(new MultiSigWallet(msg.sender, _requiredConfirmations, address(this)));
@@ -62,5 +87,3 @@ contract MultiSigFactory is IMultiSigFactory {
         emit NewMultiSigContract(msg.sender, _requiredConfirmations);   
     }
 }
-
-
