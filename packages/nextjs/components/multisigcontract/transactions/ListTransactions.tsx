@@ -5,7 +5,6 @@ import { useContractRead, useContractWrite } from "wagmi";
 import { CheckIcon, PaperAirplaneIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
-import { notification } from "~~/utils/scaffold-eth";
 
 export const ListTransactions = (multiSigWalletAddress: any) => {
   const { data: multiSigWalletInfo } = useDeployedContractInfo("MultiSigWallet");
@@ -56,7 +55,6 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
   });
 
   const {
-    data: deleteData,
     isError: isErrorDelete,
     isLoading: deleteLoading,
     isSuccess: isSuccessDelete,
@@ -81,87 +79,10 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
   };
 
   useEffect(() => {
-    if (isSuccesConfirmTransaction || isSuccessRevoke) {
+    if (isSuccesConfirmTransaction || isSuccessRevoke || isSuccessDelete || isSuccessExecute) {
       refetchGetTransactions();
     }
-  });
-  // useEffect(() => {
-  //   if (multiSigWalletInfo?.abi && (isSuccesConfirmTransaction || isErrorConfirmTransaction)) {
-  //     if (isSuccesConfirmTransaction) {
-  //       console.log("CONFIRMED!!!!!!!!");
-  //       notification.success("Confirmation successfully set");
-  //       refetchGetTransactions();
-  //     }
-  //     if (isErrorConfirmTransaction) {
-  //       console.log("ERROR revoke!!!!!!!!");
-  //       // setActionType("confirmTransaction");
-  //       notification.error("Transaction already confirmed");
-  //       refetchGetTransactions();
-  //     }
-  //   }
-  // }, [isSuccesConfirmTransaction, multiSigWalletInfo?.abi, isErrorConfirmTransaction, refetchGetTransactions]);
-
-  // useEffect(() => {
-  //   if (multiSigWalletInfo?.abi && isSuccesConfirmTransaction) {
-  //     console.log("CONFIRMED!!!!!!!!");
-  //     notification.success("Confirmation successfully set");
-  //     refetchGetTransactions();
-  //   }
-  // }, [isSuccesConfirmTransaction, multiSigWalletInfo?.abi, refetchGetTransactions]);
-
-  // useEffect(() => {
-  //   if (multiSigWalletInfo?.abi && isSuccessRevoke) {
-  //     console.log("CONFIRMED Revoke!!!!!!!!");
-  //     // setActionType("confirmTransaction");
-  //     notification.error("Confirmation successfully revoked");
-  //     refetchGetTransactions();
-  //   }
-  // }, [isSuccessRevoke, multiSigWalletInfo?.abi, refetchGetTransactions]);
-
-  // useEffect(() => {
-  //   if (multiSigWalletInfo?.abi && (isSuccessRevoke || errorRevoke)) {
-  //     if (isSuccessRevoke) {
-  //       console.log("CONFIRMED revoke!!!!!!!!");
-  //       // setActionType("confirmTransaction");
-  //       notification.error("Confirmation successfully revoked");
-  //       refetchGetTransactions();
-  //     }
-  //     if (errorRevoke) {
-  //       console.log("ERROR revoke!!!!!!!!");
-  //       // setActionType("confirmTransaction");
-  //       notification.error("Transaction not confirmed yet");
-  //       refetchGetTransactions();
-  //     }
-  //   }
-  // }, [isSuccessRevoke, multiSigWalletInfo?.abi, errorRevoke, refetchGetTransactions]);
-
-  // useEffect(() => {
-  //   if (multiSigWalletInfo?.abi && isSuccessExecute) {
-  //     console.log("CONFIRMED sent!!!!!!!!");
-  //     // setActionType("confirmTransaction");
-  //     notification.success("Tansaction successfully sent", {
-  //       icon: "🎉",
-  //     });
-  //     refetchGetTransactions();
-  //   }
-  // }, [isSuccessExecute, multiSigWalletInfo?.abi, refetchGetTransactions]);
-
-  // useEffect(() => {
-  //   if (multiSigWalletInfo?.abi && (deleteSuccess || errorDelete)) {
-  //     if (deleteSuccess) {
-  //       console.log("CONFIRMED Delete!!!!!!!!");
-  //       // setActionType("confirmTransaction");
-  //       notification.error("Tansaction successfully deleted");
-  //       refetchGetTransactions();
-  //     }
-  //     if (errorDelete) {
-  //       console.log("ERROR Delete!!!!!!!!");
-  //       // setActionType("confirmTransaction");
-  //       notification.error("Tansaction successfully deleted");
-  //       refetchGetTransactions();
-  //     }
-  //   }
-  // }, [deleteSuccess, multiSigWalletInfo?.abi, errorDelete, refetchGetTransactions]);
+  }, [isErrorConfirmTransaction, refetchGetTransactions]);
 
   return (
     <>
@@ -180,8 +101,8 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
       <NotficationsConfirmError
         isError={isErrorExecute}
         isSuccess={isSuccessExecute}
-        errorMessage="Transaction not sent"
         successMessage="Transaction successfully sent"
+        errorMessage="Not enough confirmations"
       />
       <NotficationsConfirmError
         isError={isErrorDelete}

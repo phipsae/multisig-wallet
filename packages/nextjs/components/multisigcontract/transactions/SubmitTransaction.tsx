@@ -25,17 +25,42 @@ export const SubmitTransaction = (multiSigWalletAddress: any) => {
   const {
     isLoading: isLoadingSumbitTransaction,
     isSuccess: isSuccessSubmitTransaction,
+    data: submitTransactionData,
     write: submitTransaction,
   } = useContractWrite({
     address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWallet?.abi,
     functionName: "submitTransaction",
+    onSettled(data, error) {
+      console.log("Settled", { data, error });
+    },
+    onSuccess(data) {
+      console.log("Success", data);
+      refetchGetTransactions();
+    },
   });
 
+  const onSubmit1 = async () => {
+    const tx = await submitTransaction({ args: [to, ethers.parseEther(amount), "0x0"] });
+    console.log("Log TX", await tx);
+    // if (tx) {
+    //   const txHash = tx.data.hash; // Here you get the transaction hash
+    //   console.log(`Transaction sent with hash: ${txHash}`);
+
+    //   try {
+    //     // Wait for the transaction to be confirmed
+    //     const receipt = await tx.data.wait(1); // wait for 1 confirmation by default
+    //     console.log("Transaction confirmed with receipt:", receipt);
+    //   } catch (error) {
+    //     console.error("Error waiting for transaction confirmation:", error);
+    //   }
+    // }
+  };
+
   useEffect(() => {
-    if (isSuccessSubmitTransaction) {
+    if (submitTransactionData) {
       // Perform any necessary actions on success
-      console.log("Transaction successful!");
+      console.log(submitTransactionData.hash, "Transaction successful!");
       // For example, you might want to refetch data or redirect to another page
       // ... (your code for handling success)
       notification.success("Transaction successfully submitted");
@@ -45,7 +70,7 @@ export const SubmitTransaction = (multiSigWalletAddress: any) => {
       // Show the spinner when loading
       console.log("isLoading");
     }
-  }, [isLoadingSumbitTransaction, isSuccessSubmitTransaction, refetchGetTransactions]);
+  }, [isLoadingSumbitTransaction, submitTransactionData, refetchGetTransactions]);
 
   return (
     <>
@@ -66,9 +91,10 @@ export const SubmitTransaction = (multiSigWalletAddress: any) => {
           <button
             className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto"
             onClick={() => {
-              submitTransaction({
-                args: [to, ethers.parseEther(amount), "0x0"],
-              });
+              onSubmit1();
+              // submitTransaction({
+              //   args: [to, ethers.parseEther(amount), "0x0"],
+              // });
             }}
           >
             <EnvelopeIcon className="h-4 w-4" /> Submit

@@ -668,7 +668,7 @@ const contracts = {
       name: "sepolia",
       contracts: {
         MultiSigFactory: {
-          address: "0xaAB957AC8fC8648ee7c10E005529C04A3bEe2ca5",
+          address: "0x203424dd28ea1DF35C88d214546A006D0f267D4E",
           abi: [
             {
               anonymous: false,
@@ -676,14 +676,8 @@ const contracts = {
                 {
                   indexed: true,
                   internalType: "address",
-                  name: "owner",
+                  name: "creator",
                   type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "address[]",
-                  name: "owners",
-                  type: "address[]",
                 },
                 {
                   indexed: false,
@@ -691,65 +685,15 @@ const contracts = {
                   name: "signaturesRequired",
                   type: "uint256",
                 },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "chainId",
-                  type: "uint256",
-                },
               ],
               name: "NewMultiSigContract",
               type: "event",
             },
             {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "owner",
-                  type: "address",
-                },
-              ],
-              name: "OwnerAdded",
-              type: "event",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "_owner",
-                  type: "address",
-                },
-              ],
-              name: "addOwner",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "chainId",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
               inputs: [
                 {
                   internalType: "uint256",
-                  name: "_chainId",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "_signaturesRequired",
+                  name: "_requiredConfirmations",
                   type: "uint256",
                 },
               ],
@@ -760,25 +704,39 @@ const contracts = {
             },
             {
               inputs: [],
-              name: "deployedContract",
+              name: "getMultiSigContracts",
               outputs: [
                 {
-                  internalType: "address",
+                  components: [
+                    {
+                      internalType: "address",
+                      name: "owner",
+                      type: "address",
+                    },
+                    {
+                      internalType: "address",
+                      name: "contractAddress",
+                      type: "address",
+                    },
+                    {
+                      internalType: "uint256",
+                      name: "requiredConfirmations",
+                      type: "uint256",
+                    },
+                    {
+                      internalType: "bool",
+                      name: "shown",
+                      type: "bool",
+                    },
+                    {
+                      internalType: "address[]",
+                      name: "signers",
+                      type: "address[]",
+                    },
+                  ],
+                  internalType: "struct MultiSigFactory.MultiSigContract[]",
                   name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "getOwners",
-              outputs: [
-                {
-                  internalType: "address[]",
-                  name: "",
-                  type: "address[]",
+                  type: "tuple[]",
                 },
               ],
               stateMutability: "view",
@@ -792,7 +750,35 @@ const contracts = {
                   type: "uint256",
                 },
               ],
-              name: "owners",
+              name: "multiSigContracts",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "contractAddress",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "requiredConfirmations",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "shown",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "newContract",
               outputs: [
                 {
                   internalType: "address",
@@ -807,32 +793,42 @@ const contracts = {
               inputs: [
                 {
                   internalType: "address",
-                  name: "_owner",
+                  name: "_contractAddress",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "_signerToRemove",
                   type: "address",
                 },
               ],
-              name: "removeOwner",
+              name: "removeSigners",
               outputs: [],
               stateMutability: "nonpayable",
               type: "function",
             },
             {
-              inputs: [],
-              name: "signaturesRequired",
-              outputs: [
+              inputs: [
                 {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
+                  internalType: "address",
+                  name: "_contractAddress",
+                  type: "address",
+                },
+                {
+                  internalType: "address[]",
+                  name: "_newSigners",
+                  type: "address[]",
                 },
               ],
-              stateMutability: "view",
+              name: "updateSigners",
+              outputs: [],
+              stateMutability: "nonpayable",
               type: "function",
             },
           ],
         },
         MultiSigWallet: {
-          address: "0x8b83f3f1205bC6Ce1894FFEC980f883484b89C3C",
+          address: "0x98b6562d833a229F09Aea5bD9E29f718FE424fc8",
           abi: [
             {
               inputs: [
@@ -845,6 +841,11 @@ const contracts = {
                   internalType: "uint256",
                   name: "_numConfirmationsRequired",
                   type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "_factoryAddress",
+                  type: "address",
                 },
               ],
               stateMutability: "nonpayable",
@@ -1016,9 +1017,35 @@ const contracts = {
                   type: "uint256",
                 },
               ],
+              name: "deleteTransaction",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_txIndex",
+                  type: "uint256",
+                },
+              ],
               name: "executeTransaction",
               outputs: [],
               stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "factoryAddress",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
               type: "function",
             },
             {
