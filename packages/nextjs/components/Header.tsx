@@ -23,7 +23,7 @@ export const menuLinks: HeaderMenuLink[] = [
     icon: <DocumentPlusIcon className="h-4 w-4" />,
   },
   {
-    label: "Assets & Owners",
+    label: "Wallet & Signers",
     href: "/assetsOwners",
     icon: <UserPlusIcon className="h-4 w-4" />,
   },

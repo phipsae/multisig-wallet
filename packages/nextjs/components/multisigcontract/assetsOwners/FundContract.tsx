@@ -1,9 +1,10 @@
 import * as React from "react";
-import { EtherInput } from "../scaffold-eth";
+import { EtherInput } from "../../scaffold-eth";
 import { fetchBalance, getAccount } from "@wagmi/core";
 import { ethers } from "ethers";
 import { useDebounce } from "use-debounce";
 import { usePrepareSendTransaction, useSendTransaction, useWaitForTransaction } from "wagmi";
+import { BanknotesIcon } from "@heroicons/react/24/outline";
 import { notification } from "~~/utils/scaffold-eth";
 
 export const NUMBER_REGEX = /^\.?\d+\.?\d*$/;
@@ -26,9 +27,6 @@ export function FundContract(multiSigWalletAddress: any) {
     } else if (balance.formatted < amount) {
       notification.error("Not enough ETH in wallet");
       return;
-      // } else if (!NUMBER_REGEX.test(amount)) {
-      //   notification.error("Please insert the amount of ETH you want to spend");
-      //   return;
     } else {
       sendTransaction?.();
     }
@@ -39,47 +37,43 @@ export function FundContract(multiSigWalletAddress: any) {
     // value: isValidAmount ? ethers.parseEther(amount) : undefined,
     value: NUMBER_REGEX.test(amount) ? ethers.parseEther(amount) : undefined,
   });
-  const { data, sendTransaction } = useSendTransaction(config);
 
-  const { isLoading, isSuccess } = useWaitForTransaction({
+  const {
+    data,
+    sendTransaction,
+    isLoading: isLoadingSendTransaction,
+    isSuccess: isSuccessSendTransaction,
+  } = useSendTransaction(config);
+
+  const {} = useWaitForTransaction({
     hash: data?.hash,
   });
 
-  const [transactionSubmitted, setTransactionSubmitted] = React.useState(false);
-  const [transactionSuccess, setTransactionSuccess] = React.useState(false);
-
   React.useEffect(() => {
-    if (isLoading && !transactionSubmitted) {
-      notification.info("Transaction submitted and now waiting for confirmation...", {
-        icon: "🕡",
-        duration: 13000,
-      });
-      setTransactionSubmitted(true);
-    }
-  }, [isLoading, transactionSubmitted]);
-
-  React.useEffect(() => {
-    if (isSuccess && !transactionSuccess) {
-      notification.success("Transaction successfully sent", {
+    if (isSuccessSendTransaction) {
+      notification.success("Transaction successfully sent to Multi Sig Wallet", {
         icon: "🎉",
       });
-      setTransactionSuccess(true);
     }
-  }, [isSuccess, transactionSuccess]);
+  }, [isSuccessSendTransaction]);
 
   return (
     <>
       <div className="flex flex-col">
         <div className="flex mb-4 justify-center items-center">
-          <h2>Fund the contract with Ether</h2>
-        </div>
-        <div className="flex mb-4 justify-center items-center">
-          <span className="w-1/2">
+          <span className="w-[150px]">
             <EtherInput value={amount} onChange={amount => setAmount(amount)} name="eth" />
           </span>
           <button className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mx-2" onClick={handleSubmit}>
-            Send
+            {isLoadingSendTransaction ? (
+              <span className="loading loading-spinner text-primary"></span>
+            ) : (
+              <BanknotesIcon className="h-4 w-4" />
+            )}
           </button>
+        </div>
+        <div className="flex mb-4 justify-center items-center">
+          <span>Fund the contract with Ether</span>
         </div>
       </div>
     </>

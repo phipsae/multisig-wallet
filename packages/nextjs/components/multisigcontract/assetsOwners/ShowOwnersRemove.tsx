@@ -6,7 +6,7 @@ import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
 export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
-  const [removeOwner, setRemoveOwner] = useState("");
+  const [OwnerBeRemoved, setOwnerBeRemoved] = useState("");
 
   const { data: multiSigWallet } = useScaffoldContract({
     contractName: "MultiSigWallet",
@@ -14,8 +14,6 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
 
   const {
     data: owners,
-    isError: ownersError,
-    isLoading: ownersLoading,
     isSuccess: isSuccessGetOwners,
     refetch: refetchGetOwners,
   } = useContractRead({
@@ -30,17 +28,10 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
     functionName: "creator",
   });
 
-  const { data: confirmationsRequired } = useContractRead({
-    address: multiSigWalletAddress.multiSigWalletAddress,
-    abi: multiSigWallet?.abi,
-    functionName: "numConfirmationsRequired",
-  });
-
   const {
-    data,
-    isLoading,
-    isSuccess: isSuccessRemoveOwners,
-    write: removeOwners,
+    isLoading: isLoadingRemoveOwner,
+    isSuccess: isSuccessremoveOwner,
+    write: removeOwner,
   } = useContractWrite({
     address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWallet?.abi,
@@ -48,29 +39,25 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
   });
 
   useEffect(() => {
-    if (multiSigWallet?.abi && isSuccessRemoveOwners) {
+    if (multiSigWallet?.abi && isSuccessremoveOwner) {
       console.log("Transaction successful!");
-      notification.success("Signer successfully removed", {
-        icon: "🎉",
-      });
+      notification.success("Signer successfully removed");
       refetchGetOwners();
     }
-  }, [isSuccessGetOwners, isSuccessRemoveOwners, refetchGetOwners, removeOwner, multiSigWallet?.abi]);
+  }, [isSuccessGetOwners, isSuccessremoveOwner, refetchGetOwners, multiSigWallet?.abi]);
 
   return (
     <>
       {
         <div className="mt-8">
           <div className="text-center mb-4">
-            <span className="block text-2xl font-bold">
-              Multi Sig Owner List - required Confirmations: {Number(confirmationsRequired)}
-            </span>
+            <span className="block text-2xl font-bold">Multi Sig Signer List</span>
           </div>
           <div className="overflow-x-auto shadow-lg">
             <table className="table table-zebra w-full">
               <thead>
                 <tr>
-                  <th className="bg-primary">Address Owner</th>
+                  <th className="bg-primary">Signer Address</th>
                   <th className="bg-primary">Remove</th>
                   <th className="bg-primary">Confirm</th>
                 </tr>
@@ -79,7 +66,7 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
                 {!owners || owners.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="text-center">
-                      No owners added yet
+                      No signers added yet
                     </td>
                   </tr>
                 ) : (
@@ -93,12 +80,9 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
                           <button
                             // disabled={!write}
                             hidden={creator == owner}
-                            disabled={!removeOwners}
+                            disabled={!removeOwner}
                             onClick={() => {
-                              console.log("RemoveOwner first from Button: ", removeOwner);
-                              console.log("Owner from Button: ", owner);
-                              setRemoveOwner(owner);
-                              console.log("RemoveOwner from Button: ", removeOwner);
+                              setOwnerBeRemoved(owner);
                             }}
                           >
                             <TrashIcon className="h-4 w-4" />
@@ -107,23 +91,31 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
                         <td className="text-left">
                           <button
                             // disabled={!write}
-                            hidden={removeOwner != owner || creator == owner}
-                            disabled={!removeOwners}
+                            hidden={OwnerBeRemoved != owner || creator == owner}
+                            disabled={!removeOwner}
                             onClick={() => {
-                              removeOwner != "" && removeOwners({ args: [removeOwner] });
+                              OwnerBeRemoved != "" && removeOwner({ args: [OwnerBeRemoved] });
                             }}
                           >
-                            <CheckIcon className="h-4 w-4" />
+                            {isLoadingRemoveOwner ? (
+                              <span className="loading loading-spinner text-primary"></span>
+                            ) : (
+                              <CheckIcon className="h-4 w-4" />
+                            )}
                           </button>
-                          <button
-                            hidden={removeOwner != owner || creator == owner}
-                            disabled={!removeOwners}
-                            onClick={() => {
-                              setRemoveOwner("");
-                            }}
-                          >
-                            <XMarkIcon className="h-4 w-4" />
-                          </button>
+                          {isLoadingRemoveOwner ? (
+                            ""
+                          ) : (
+                            <button
+                              hidden={OwnerBeRemoved != owner || creator == owner}
+                              disabled={!removeOwner}
+                              onClick={() => {
+                                setOwnerBeRemoved("");
+                              }}
+                            >
+                              <XMarkIcon className="h-4 w-4" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );

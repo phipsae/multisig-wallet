@@ -12,7 +12,30 @@ export const AccountConnectButton: React.FC<AccountConnectButtonProps> = ({ wall
 
   return (
     <>
-      <button
+      {walletConnect ? (
+        <button
+          className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto mx-2"
+          onClick={() => {
+            setWalletConnected(walletConnect);
+            setMyAddress(address);
+            console.log(walletConnected);
+          }}
+        >
+          {walletConnect ? "Connect Account" : "Disconnect Account"}
+        </button>
+      ) : (
+        <button
+          className="btn btn-error h-[2.2rem] min-h-[2.2rem] mt-auto mx-2"
+          onClick={() => {
+            setWalletConnected(walletConnect);
+            setMyAddress(address);
+            console.log(walletConnected);
+          }}
+        >
+          {walletConnect ? "Connect Account" : "Disconnect Account"}
+        </button>
+      )}
+      {/* <button
         className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto mx-2"
         onClick={() => {
           setWalletConnected(walletConnect);
@@ -21,7 +44,7 @@ export const AccountConnectButton: React.FC<AccountConnectButtonProps> = ({ wall
         }}
       >
         {walletConnect ? "Connect Account" : "Disconnect Account"}
-      </button>
+      </button> */}
     </>
   );
 };

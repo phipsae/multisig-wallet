@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { CheckIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
+import Link from "next/link";
+import { Address, Balance } from "~~/components/scaffold-eth";
 import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 import { useSharedState } from "~~/sharedStateContext";
 
@@ -26,6 +26,7 @@ export const ContractList = (myAddress: any) => {
               <th className="bg-primary">Contract Address</th>
               <th className="bg-primary">Confirmations required</th>
               <th className="bg-primary">Owner</th>
+              <th className="bg-primary">Balance</th>
               <th className="bg-primary">Select contract</th>
             </tr>
           </thead>
@@ -52,6 +53,10 @@ export const ContractList = (myAddress: any) => {
                         <td className="text-center">
                           <Address address={contract.owner} />
                         </td>
+                        <td className="text-center">
+                          <Balance className="text-xl" address={contract.contractAddress} />
+                        </td>
+
                         <td
                           className="text-center"
                           onClick={() => {
@@ -59,7 +64,9 @@ export const ContractList = (myAddress: any) => {
                             setMultiSigWalletAddress(contract.contractAddress);
                           }}
                         >
-                          <CheckIcon className="h-4 w-4" />
+                          <Link href="/assetsOwners">
+                            <input type="checkbox" checked={selectedRowIndex === contract.contractAddress} readOnly />
+                          </Link>
                         </td>
                       </tr>
                     );
