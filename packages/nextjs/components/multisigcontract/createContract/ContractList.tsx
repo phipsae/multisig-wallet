@@ -27,7 +27,7 @@ export const ContractList = (myAddress: any) => {
               <th className="bg-primary">Confirmations required</th>
               <th className="bg-primary">Owner</th>
               <th className="bg-primary">Balance</th>
-              <th className="bg-primary">Select contract</th>
+              <th className="bg-primary">Select wallet</th>
             </tr>
           </thead>
           <tbody>

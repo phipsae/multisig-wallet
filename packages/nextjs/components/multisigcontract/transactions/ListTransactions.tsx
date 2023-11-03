@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { NotficationsConfirmError } from "../NotficationsConfirmError";
 import { ethers } from "ethers";
-import { useContractRead, useContractWrite } from "wagmi";
+import { useContractRead, useContractWrite, useWaitForTransaction } from "wagmi";
 import { CheckIcon, PaperAirplaneIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Spinner } from "~~/components/assets/Spinner";
 import { Address } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 
@@ -22,9 +23,8 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
   });
 
   const {
+    data: dataConfirmTransaction,
     isError: isErrorConfirmTransaction,
-    isLoading: isLoadingConfirmTransaction,
-    isSuccess: isSuccesConfirmTransaction,
     write: confirmTransaction,
   } = useContractWrite({
     address: multiSigWalletAddress.multiSigWalletAddress,
@@ -32,10 +32,14 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
     functionName: "confirmTransaction",
   });
 
+  const { isLoading: isLoadingConfirmTransactionWait, isSuccess: isSuccesConfirmTransactionWait } =
+    useWaitForTransaction({
+      hash: dataConfirmTransaction?.hash,
+    });
+
   const {
+    data: dataRevokeConfirmation,
     isError: isErrorRevoke,
-    isLoading: isLoadingRevoke,
-    isSuccess: isSuccessRevoke,
     write: revokeConfirmation,
   } = useContractWrite({
     address: multiSigWalletAddress.multiSigWalletAddress,
@@ -43,7 +47,12 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
     functionName: "revokeConfirmation",
   });
 
+  const { isLoading: isLoadingRevokeWait, isSuccess: isSuccessRevokeWait } = useWaitForTransaction({
+    hash: dataRevokeConfirmation?.hash,
+  });
+
   const {
+    data: dataExecuteTransaction,
     isError: isErrorExecute,
     isLoading: isLoadingExecute,
     isSuccess: isSuccessExecute,
@@ -54,7 +63,12 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
     functionName: "executeTransaction",
   });
 
+  const { isLoading: isLoadingExecuteWait, isSuccess: isSuccessExecuteWait } = useWaitForTransaction({
+    hash: dataExecuteTransaction?.hash,
+  });
+
   const {
+    data: dataDelete,
     isError: isErrorDelete,
     isLoading: deleteLoading,
     isSuccess: isSuccessDelete,
@@ -63,6 +77,10 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
     address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWalletInfo?.abi,
     functionName: "deleteTransaction",
+  });
+
+  const { isLoading: isDeleteLoadingWait, isSuccess: isSuccessDeleteWait } = useWaitForTransaction({
+    hash: dataDelete?.hash,
   });
 
   const nonExecutedTransactions = () => {
@@ -79,34 +97,40 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
   };
 
   useEffect(() => {
-    if (isSuccesConfirmTransaction || isSuccessRevoke || isSuccessDelete || isSuccessExecute) {
+    if (isSuccesConfirmTransactionWait || isSuccessRevokeWait || isSuccessDeleteWait || isSuccessExecuteWait) {
       refetchGetTransactions();
     }
-  }, [isErrorConfirmTransaction, refetchGetTransactions]);
+  }, [
+    isSuccesConfirmTransactionWait,
+    isSuccessRevokeWait,
+    isSuccessExecuteWait,
+    isSuccessDeleteWait,
+    refetchGetTransactions,
+  ]);
 
   return (
     <>
       <NotficationsConfirmError
         isError={isErrorConfirmTransaction}
-        isSuccess={isSuccesConfirmTransaction}
+        isSuccess={isSuccesConfirmTransactionWait}
         errorMessage="Transaction already confirmed"
         successMessage="Confirmation successfully set"
       />
       <NotficationsConfirmError
         isError={isErrorRevoke}
-        isSuccess={isSuccessRevoke}
+        isSuccess={isSuccessRevokeWait}
         errorMessage="Transaction not yet confirmed"
         successMessage="Confirmation successfully revoked"
       />
       <NotficationsConfirmError
         isError={isErrorExecute}
-        isSuccess={isSuccessExecute}
+        isSuccess={isSuccessExecuteWait}
         successMessage="Transaction successfully sent"
         errorMessage="Not enough confirmations"
       />
       <NotficationsConfirmError
         isError={isErrorDelete}
-        isSuccess={isSuccessDelete}
+        isSuccess={isSuccessDeleteWait}
         successMessage="Transaction successfully deleted"
         errorMessage="Transaction couldn't be deleted"
       />
@@ -155,8 +179,10 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
                               })
                             }
                           >
-                            {isLoadingConfirmTransaction ? (
-                              <span className="loading loading-spinner text-primary"></span>
+                            {isLoadingConfirmTransactionWait ? (
+                              <div className="flex  justify-center">
+                                <Spinner width="" height=""></Spinner>
+                              </div>
                             ) : (
                               <CheckIcon className="h-4 w-4" />
                             )}
@@ -164,15 +190,17 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
                         </td>
                         <td className="text-center">
                           <button
-                            // disabled={!revokeConfirmation}
+                            disabled={isLoadingConfirmTransactionWait}
                             onClick={() =>
                               revokeConfirmation({
                                 args: [BigInt(index)],
                               })
                             }
                           >
-                            {isLoadingRevoke ? (
-                              <span className="loading loading-spinner text-primary"></span>
+                            {isLoadingRevokeWait ? (
+                              <div className="flex  justify-center">
+                                <Spinner width="" height=""></Spinner>
+                              </div>
                             ) : (
                               <XMarkIcon className="h-4 w-4" />
                             )}
@@ -188,8 +216,10 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
                               })
                             }
                           >
-                            {isLoadingExecute ? (
-                              <span className="loading loading-spinner text-primary"></span>
+                            {isLoadingExecuteWait ? (
+                              <div className="flex  justify-center">
+                                <Spinner width="" height=""></Spinner>
+                              </div>
                             ) : (
                               <PaperAirplaneIcon className="h-4 w-4" />
                             )}
@@ -204,8 +234,10 @@ export const ListTransactions = (multiSigWalletAddress: any) => {
                               })
                             }
                           >
-                            {deleteLoading ? (
-                              <span className="loading loading-spinner text-primary"></span>
+                            {isDeleteLoadingWait ? (
+                              <div className="flex  justify-center">
+                                <Spinner width="" height=""></Spinner>
+                              </div>
                             ) : (
                               <TrashIcon className="h-4 w-4" />
                             )}

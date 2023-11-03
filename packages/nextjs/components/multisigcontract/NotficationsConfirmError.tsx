@@ -8,7 +8,7 @@ interface NotficationsConfirmErrorProps {
   successMessage: string;
   isError: boolean;
   errorMessage: string;
-  multiSigWalletAddress: any;
+  //   multiSigWalletAddress: any;
 }
 
 export const NotficationsConfirmError: React.FC<NotficationsConfirmErrorProps> = ({
@@ -16,7 +16,7 @@ export const NotficationsConfirmError: React.FC<NotficationsConfirmErrorProps> =
   successMessage,
   isError,
   errorMessage,
-  multiSigWalletAddress,
+  //   multiSigWalletAddress,
 }) => {
   const { data: multiSigWalletInfo } = useDeployedContractInfo("MultiSigWallet");
 

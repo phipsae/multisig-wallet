@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { useDebounce } from "use-debounce";
 import { usePrepareSendTransaction, useSendTransaction, useWaitForTransaction } from "wagmi";
 import { BanknotesIcon } from "@heroicons/react/24/outline";
+import { Spinner } from "~~/components/assets/Spinner";
 import { notification } from "~~/utils/scaffold-eth";
 
 export const NUMBER_REGEX = /^\.?\d+\.?\d*$/;
@@ -38,24 +39,22 @@ export function FundContract(multiSigWalletAddress: any) {
     value: NUMBER_REGEX.test(amount) ? ethers.parseEther(amount) : undefined,
   });
 
-  const {
-    data,
-    sendTransaction,
-    isLoading: isLoadingSendTransaction,
-    isSuccess: isSuccessSendTransaction,
-  } = useSendTransaction(config);
+  const { data: dataSendTransaction, sendTransaction } = useSendTransaction(config);
 
-  const {} = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading: isLoadingSendTransactionWait, isSuccess: isSuccessSendTransactionWait } = useWaitForTransaction({
+    hash: dataSendTransaction?.hash,
   });
 
   React.useEffect(() => {
-    if (isSuccessSendTransaction) {
+    if (isSuccessSendTransactionWait) {
       notification.success("Transaction successfully sent to Multi Sig Wallet", {
         icon: "🎉",
       });
+      if (isLoadingSendTransactionWait) {
+        notification.success("Waiting for transaction confirmation", { icon: "⏱️" });
+      }
     }
-  }, [isSuccessSendTransaction]);
+  }, [isSuccessSendTransactionWait, isLoadingSendTransactionWait]);
 
   return (
     <>
@@ -64,9 +63,11 @@ export function FundContract(multiSigWalletAddress: any) {
           <span className="w-[150px]">
             <EtherInput value={amount} onChange={amount => setAmount(amount)} name="eth" />
           </span>
-          <button className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mx-2" onClick={handleSubmit}>
-            {isLoadingSendTransaction ? (
-              <span className="loading loading-spinner text-primary"></span>
+          <button className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mx-2 " onClick={handleSubmit}>
+            {isLoadingSendTransactionWait ? (
+              <div className="flex  justify-center">
+                <Spinner width="" height=""></Spinner>
+              </div>
             ) : (
               <BanknotesIcon className="h-4 w-4" />
             )}

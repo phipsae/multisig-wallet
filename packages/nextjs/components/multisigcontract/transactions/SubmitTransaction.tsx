@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { AddressInput, EtherInput } from "../../scaffold-eth";
 import { ethers } from "ethers";
-import { useContractRead, useContractWrite } from "wagmi";
+import { useContractRead, useContractWrite, useWaitForTransaction } from "wagmi";
 import { EnvelopeIcon } from "@heroicons/react/24/outline";
+import { Spinner } from "~~/components/assets/Spinner";
 import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -22,55 +23,26 @@ export const SubmitTransaction = (multiSigWalletAddress: any) => {
     abi: multiSigWallet?.abi,
     functionName: "getTransactions",
   });
-  const {
-    isLoading: isLoadingSumbitTransaction,
-    isSuccess: isSuccessSubmitTransaction,
-    data: submitTransactionData,
-    write: submitTransaction,
-  } = useContractWrite({
+  const { data: dataSubmitTransaction, write: submitTransaction } = useContractWrite({
     address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWallet?.abi,
     functionName: "submitTransaction",
-    onSettled(data, error) {
-      console.log("Settled", { data, error });
-    },
-    onSuccess(data) {
-      console.log("Success", data);
-      refetchGetTransactions();
-    },
   });
 
-  const onSubmit1 = async () => {
-    const tx = await submitTransaction({ args: [to, ethers.parseEther(amount), "0x0"] });
-    console.log("Log TX", await tx);
-    // if (tx) {
-    //   const txHash = tx.data.hash; // Here you get the transaction hash
-    //   console.log(`Transaction sent with hash: ${txHash}`);
-
-    //   try {
-    //     // Wait for the transaction to be confirmed
-    //     const receipt = await tx.data.wait(1); // wait for 1 confirmation by default
-    //     console.log("Transaction confirmed with receipt:", receipt);
-    //   } catch (error) {
-    //     console.error("Error waiting for transaction confirmation:", error);
-    //   }
-    // }
-  };
+  const { isLoading: isLoadingSumbitTransactionWait, isSuccess: isSuccessSubmitTransactionWait } =
+    useWaitForTransaction({
+      hash: dataSubmitTransaction?.hash,
+    });
 
   useEffect(() => {
-    if (submitTransactionData) {
-      // Perform any necessary actions on success
-      console.log(submitTransactionData.hash, "Transaction successful!");
-      // For example, you might want to refetch data or redirect to another page
-      // ... (your code for handling success)
+    if (isSuccessSubmitTransactionWait) {
       notification.success("Transaction successfully submitted");
       refetchGetTransactions();
     }
-    if (isLoadingSumbitTransaction) {
-      // Show the spinner when loading
-      console.log("isLoading");
+    if (isLoadingSumbitTransactionWait) {
+      notification.success("Waiting for transaction confirmation", { icon: "⏱️" });
     }
-  }, [isLoadingSumbitTransaction, submitTransactionData, refetchGetTransactions]);
+  }, [isLoadingSumbitTransactionWait, isSuccessSubmitTransactionWait, refetchGetTransactions]);
 
   return (
     <>
@@ -91,13 +63,21 @@ export const SubmitTransaction = (multiSigWalletAddress: any) => {
           <button
             className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto"
             onClick={() => {
-              onSubmit1();
-              // submitTransaction({
-              //   args: [to, ethers.parseEther(amount), "0x0"],
-              // });
+              submitTransaction({
+                args: [to, ethers.parseEther(amount), "0x0"],
+              });
             }}
           >
-            <EnvelopeIcon className="h-4 w-4" /> Submit
+            {isLoadingSumbitTransactionWait ? (
+              <div className="flex w-[100px] justify-center">
+                <Spinner width="100" height="100"></Spinner>
+              </div>
+            ) : (
+              <div className="flex flex-row w-[100px]">
+                <EnvelopeIcon className="h-4 w-4" />
+                <span className="mx-3"> Submit</span>
+              </div>
+            )}
           </button>
         </div>
       </div>

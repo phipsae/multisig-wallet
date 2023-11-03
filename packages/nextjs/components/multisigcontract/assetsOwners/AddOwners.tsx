@@ -1,7 +1,8 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { AddressInput } from "../../scaffold-eth";
-import { useContractRead, useContractWrite } from "wagmi";
+import { useContractRead, useContractWrite, useWaitForTransaction } from "wagmi";
+import { Spinner } from "~~/components/assets/Spinner";
 import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -19,15 +20,17 @@ export const AddOwners = (multiSigWalletAddress: any) => {
   });
 
   const {
-    isLoading: isLoadingAddOwner,
-    isSuccess: isSuccessAddOwner,
+    data: dataAddOwner,
     isError: isErrorAddOwner,
-    error: errorAddOwner,
     write: addOwner,
   } = useContractWrite({
     address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWallet?.abi,
     functionName: "addOwner",
+  });
+
+  const { isLoading: isLoadingAddOwnerWait, isSuccess: isSuccessAddOwnerWait } = useWaitForTransaction({
+    hash: dataAddOwner?.hash,
   });
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -37,19 +40,20 @@ export const AddOwners = (multiSigWalletAddress: any) => {
   };
 
   useEffect(() => {
-    if (multiSigWallet?.abi && isSuccessAddOwner) {
-      console.log("Transaction successful!");
+    if (multiSigWallet?.abi && isSuccessAddOwnerWait) {
       notification.success("Signer successfully added", {
         icon: "🎉",
       });
       refetchGetOwners();
     }
+    if (multiSigWallet?.abi && isLoadingAddOwnerWait) {
+      notification.success("Waiting for transaction confirmation", { icon: "⏱️" });
+    }
     if (multiSigWallet?.abi && isErrorAddOwner) {
-      console.log(errorAddOwner);
       notification.error("Signer already added");
       refetchGetOwners();
     }
-  }, [isSuccessAddOwner, refetchGetOwners, multiSigWallet?.abi, isErrorAddOwner, errorAddOwner]);
+  }, [isSuccessAddOwnerWait, refetchGetOwners, multiSigWallet?.abi, isErrorAddOwner, isLoadingAddOwnerWait]);
 
   return (
     <>
@@ -66,9 +70,15 @@ export const AddOwners = (multiSigWalletAddress: any) => {
           <button
             className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto mx-2"
             onClick={handleSubmit}
-            disabled={isLoadingAddOwner}
+            disabled={isLoadingAddOwnerWait}
           >
-            {isLoadingAddOwner ? <span className="loading loading-spinner text-primary"></span> : "Add Signer"}
+            {isLoadingAddOwnerWait ? (
+              <div className="flex w-[100px] justify-center">
+                <Spinner width="100" height="100"></Spinner>
+              </div>
+            ) : (
+              "Add Signer"
+            )}
           </button>
         </div>
         <div className="text-center">

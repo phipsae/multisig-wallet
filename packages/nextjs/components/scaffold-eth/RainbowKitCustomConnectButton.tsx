@@ -14,7 +14,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { Address, Balance, BlockieAvatar } from "~~/components/scaffold-eth";
 import { useAutoConnect, useNetworkColor } from "~~/hooks/scaffold-eth";
-import { useSharedState } from "~~/sharedStateContext";
 import { getBlockExplorerAddressLink, getTargetNetwork } from "~~/utils/scaffold-eth";
 
 /**
@@ -27,8 +26,6 @@ export const RainbowKitCustomConnectButton = () => {
   const { disconnect } = useDisconnect();
   const { switchNetwork } = useSwitchNetwork();
   const [addressCopied, setAddressCopied] = useState(false);
-  const { walletConnected, setWalletConnected } = useSharedState();
-  const { setMyAddress } = useSharedState();
 
   return (
     <ConnectButton.Custom>
@@ -43,7 +40,13 @@ export const RainbowKitCustomConnectButton = () => {
             {(() => {
               if (!connected) {
                 return (
-                  <button className="btn btn-primary btn-sm" onClick={openConnectModal} type="button">
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => {
+                      openConnectModal();
+                    }}
+                    type="button"
+                  >
                     Connect Wallet
                   </button>
                 );
@@ -76,7 +79,9 @@ export const RainbowKitCustomConnectButton = () => {
                         <button
                           className="menu-item text-error btn-sm !rounded-xl flex gap-3 py-3"
                           type="button"
-                          onClick={() => disconnect()}
+                          onClick={() => {
+                            disconnect();
+                          }}
                         >
                           <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Disconnect</span>
                         </button>

@@ -1,31 +1,34 @@
 import React from "react";
 import Link from "next/link";
 import { useSharedState } from "../sharedStateContext";
-import { getAccount } from "@wagmi/core";
 import type { NextPage } from "next";
-import { AccountConnectButton } from "~~/components/multisigcontract/AccountConnectButton";
+import { useAccount } from "wagmi";
 import { AddOwners } from "~~/components/multisigcontract/assetsOwners/AddOwners";
 import { FundContract } from "~~/components/multisigcontract/assetsOwners/FundContract";
 import { MultiSigWalletOverview } from "~~/components/multisigcontract/assetsOwners/MultiSigWalletOverview";
 import { ShowOwnersRemove } from "~~/components/multisigcontract/assetsOwners/ShowOwnersRemove";
+import { ContractList } from "~~/components/multisigcontract/createContract/ContractList";
 
 const AssetsOwners: NextPage = () => {
   const { multiSigWalletAddress } = useSharedState();
-  const { walletConnected } = useSharedState();
+  const { isConnected, address } = useAccount();
   return (
     <>
       <div className="container mx-auto flex flex-col mt-5">
-        {!walletConnected ? (
-          <div className="flex justify-center mt-5">
-            <AccountConnectButton walletConnect={true} address={getAccount().address?.toString() || ""} />
+        {!isConnected ? (
+          <div className="flex justify-center flex-col h-screen items-center">
+            <span className="text-xl font-bold"> No wallet connected </span>
           </div>
         ) : multiSigWalletAddress == "" ? (
-          <div className="flex justify-center">
-            <Link href="/createContract">
-              <button className="btn btn-primary h-[2.2rem] min-h-[2.2rem] mt-auto mx-2">
-                Select a multi sig wallet
-              </button>
-            </Link>
+          <div>
+            <div className="flex justify-center mt-5">
+              <div className="text-center mb-4 mt-5">
+                <span className="block text-2xl font-bold">Select your Multi Sig Wallet </span>
+              </div>
+            </div>
+            <div className="flex justify-center mt-5">
+              <ContractList myAddress={address} />
+            </div>
           </div>
         ) : (
           <div className="container mx-auto flex flex-col mt-5">
@@ -46,9 +49,6 @@ const AssetsOwners: NextPage = () => {
             </div>
           </div>
         )}
-        <div className="flex justify-center mt-5">
-          {walletConnected && <AccountConnectButton walletConnect={false} address={""} />}
-        </div>
       </div>
     </>
   );

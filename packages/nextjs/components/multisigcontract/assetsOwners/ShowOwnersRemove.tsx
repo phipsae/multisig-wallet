@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useContractRead, useContractWrite } from "wagmi";
+import { useContractRead, useContractWrite, useWaitForTransaction } from "wagmi";
 import { CheckIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Spinner } from "~~/components/assets/Spinner";
 import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
@@ -12,11 +13,7 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
     contractName: "MultiSigWallet",
   });
 
-  const {
-    data: owners,
-    isSuccess: isSuccessGetOwners,
-    refetch: refetchGetOwners,
-  } = useContractRead({
+  const { data: owners, refetch: refetchGetOwners } = useContractRead({
     address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWallet?.abi,
     functionName: "getOwners",
@@ -28,23 +25,26 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
     functionName: "creator",
   });
 
-  const {
-    isLoading: isLoadingRemoveOwner,
-    isSuccess: isSuccessremoveOwner,
-    write: removeOwner,
-  } = useContractWrite({
+  const { data: dataRemoveOwner, write: removeOwner } = useContractWrite({
     address: multiSigWalletAddress.multiSigWalletAddress,
     abi: multiSigWallet?.abi,
     functionName: "removeOwner",
   });
 
+  const { isLoading: isLoadingRemoveOwnerWait, isSuccess: isSuccessremoveOwnerWait } = useWaitForTransaction({
+    hash: dataRemoveOwner?.hash,
+  });
+
   useEffect(() => {
-    if (multiSigWallet?.abi && isSuccessremoveOwner) {
+    if (multiSigWallet?.abi && isSuccessremoveOwnerWait) {
       console.log("Transaction successful!");
       notification.success("Signer successfully removed");
       refetchGetOwners();
     }
-  }, [isSuccessGetOwners, isSuccessremoveOwner, refetchGetOwners, multiSigWallet?.abi]);
+    if (multiSigWallet?.abi && isLoadingRemoveOwnerWait) {
+      notification.success("Waiting for transaction confirmation", { icon: "⏱️" });
+    }
+  }, [isSuccessremoveOwnerWait, refetchGetOwners, multiSigWallet?.abi, isLoadingRemoveOwnerWait]);
 
   return (
     <>
@@ -97,13 +97,15 @@ export const ShowOwnersRemove = (multiSigWalletAddress: any) => {
                               OwnerBeRemoved != "" && removeOwner({ args: [OwnerBeRemoved] });
                             }}
                           >
-                            {isLoadingRemoveOwner ? (
-                              <span className="loading loading-spinner text-primary"></span>
+                            {isLoadingRemoveOwnerWait ? (
+                              <div className="flex w-[100px] justify-center">
+                                <Spinner width="100" height="100"></Spinner>
+                              </div>
                             ) : (
                               <CheckIcon className="h-4 w-4" />
                             )}
                           </button>
-                          {isLoadingRemoveOwner ? (
+                          {isLoadingRemoveOwnerWait ? (
                             ""
                           ) : (
                             <button

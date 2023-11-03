@@ -23,9 +23,6 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const { isDarkMode } = useDarkMode();
 
-  // from me
-  const [multiSigWallet, setMultiSigWallet] = useState<string>("HUHU!!!!");
-
   useEffect(() => {
     if (price > 0) {
       setNativeCurrencyPrice(price);
@@ -45,7 +42,9 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
         theme={isDarkTheme ? darkTheme() : lightTheme()}
       >
         <div className="flex flex-col min-h-screen">
-          <Header />
+          <SharedStateProvider>
+            <Header />
+          </SharedStateProvider>
           <main className="relative flex flex-col flex-1">
             <SharedStateProvider>
               <Component {...pageProps} />
